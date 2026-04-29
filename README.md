@@ -1,7 +1,5 @@
 # RV-Sparse Coding Challenge
 
-Repository: https://github.com/ahmedtaha100/R
-
 ## Overview
 
 This project implements `sparse_multiply` in `challenge.c`.
