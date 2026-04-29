@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <limits.h>
 #include <math.h>
 #include <stdint.h>
@@ -253,12 +254,36 @@ static int validate_csr(
     return 1;
 }
 
+static int parse_seed(int argc, char** argv, unsigned int* seed) {
+    char* end = NULL;
+    unsigned long parsed = 0;
+
+    if (argc <= 1) {
+        *seed = 123456789U;
+        return 1;
+    }
+
+    errno = 0;
+    parsed = strtoul(argv[1], &end, 10);
+    if (errno != 0 || end == argv[1] || *end != '\0' || parsed > UINT_MAX) {
+        fprintf(stderr, "Invalid seed: %s\n", argv[1]);
+        return 0;
+    }
+
+    *seed = (unsigned int)parsed;
+    return 1;
+}
+
 int main(int argc, char** argv) {
-    unsigned int seed = argc > 1 ? (unsigned int)strtoul(argv[1], NULL, 10) : 123456789U;
+    unsigned int seed = 0;
+
+    if (!parse_seed(argc, argv, &seed)) {
+        return 1;
+    }
 
     srand(seed);
     printf("Seed: %u\n", seed);
-    
+
     const int num_iterations = 100;
     int passed_count = 0;
 
@@ -266,7 +291,7 @@ int main(int argc, char** argv) {
         int rows = rand() % 41 + 5;
         int cols = rand() % 41 + 5;
         double density = 0.05 + (rand() / (double) RAND_MAX) * 0.35;
-        
+
         size_t mat_sz = (size_t)rows * (size_t)cols;
 
         double* A = NULL;
@@ -349,8 +374,7 @@ int main(int argc, char** argv) {
 
         double max_err = 0.0;
         int csr_valid = validate_csr(iter, rows, cols, A, out_nnz, values, col_indices, row_ptrs);
-        int numeric_pass = csr_valid;
-        int passed = 0;
+        int numeric_pass = 1;
 
         if (csr_valid) {
             for (int i = 0; i < rows; ++i) {
@@ -363,9 +387,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        passed = csr_valid && numeric_pass;
-
-        if (passed) {
+        if (csr_valid && numeric_pass) {
             passed_count++;
         }
 
@@ -389,6 +411,6 @@ int main(int argc, char** argv) {
         passed_count == num_iterations ? "All tests passed!" : "Some tests failed.",
         passed_count, num_iterations
     );
-           
+
     return passed_count == num_iterations ? 0 : 1;
 }

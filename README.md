@@ -30,6 +30,6 @@ Pass an optional integer seed to reproduce a specific randomized test run:
 - `row_ptrs`: CSR row offsets with `row_ptrs[0] = 0` and `row_ptrs[rows] = out_nnz`.
 - `y`: matrix-vector product.
 
-The input vector `x` and output vector `y` must be separate buffers.
+The caller should provide distinct, non-overlapping storage for `A`, `x`, `values`, `col_indices`, `row_ptrs`, and `y`. The input vector `x` and output vector `y` must be separate buffers.
 
 `sparse_multiply_checked` is available for callers that want explicit capacity validation while preserving the challenge-required `sparse_multiply` signature.
