@@ -79,7 +79,6 @@ int sparse_multiply_checked(
     row_ptrs[0] = 0;
 
     for (int i = 0; i < rows; ++i) {
-        double sum = 0.0;
         const double* row = A + (size_t)i * (size_t)cols;
 
         for (int j = 0; j < cols; ++j) {
@@ -88,13 +87,21 @@ int sparse_multiply_checked(
             if (value != 0.0) {
                 values[nnz] = value;
                 col_indices[nnz] = j;
-                sum += value * x[j];
                 ++nnz;
             }
         }
 
-        y[i] = sum;
         row_ptrs[i + 1] = (int)nnz;
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        double sum = 0.0;
+
+        for (int k = row_ptrs[i]; k < row_ptrs[i + 1]; ++k) {
+            sum += values[k] * x[col_indices[k]];
+        }
+
+        y[i] = sum;
     }
 
     *out_nnz = (int)nnz;
