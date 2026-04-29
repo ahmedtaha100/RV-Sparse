@@ -1,0 +1,7 @@
+run
+run.exe
+*.o
+*.obj
+*.exe
+RV-Sparse_ Coding Challenge.pdf
+submission.pdf
